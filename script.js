@@ -45,18 +45,19 @@ const questions=[{
 }];
 
 let questionElement=document.getElementById("question");
-let ansButton=document.getElementById("answer-buttons");
+let ansButtons=document.getElementById("answer-buttons");
 let Next=document.getElementById("nextbtn");
-
 let currentQsIndex=0;
 let score=0;
 function startQuiz(){
     currentQsIndex=0;
     score=0;
     Next.style.display="inline";
+    Next.innerHTML="Next";
     showQuestion();
 };
 function showQuestion(){
+    clearans();
     let currentQs=questions[currentQsIndex]
     let qsNo=currentQsIndex+1;
     questionElement.innerText=qsNo+". "+currentQs.question;
@@ -64,7 +65,56 @@ function showQuestion(){
         const button= document.createElement("button");
         button.innerHTML=answer.text;
         button.classList.add("btn");
-        ansButton.appendChild(button);
+        ansButtons.appendChild(button);
+        if(answer.correct){
+            button.dataset.correct=answer.correct;
+        }
+        button.addEventListener("click",(e)=>{
+            const selectedBtn=e.target;
+            if (selectedBtn.dataset.correct==="true"){
+                selectedBtn.classList.add("correct");
+                score++;
+            }else{
+                selectedBtn.classList.add("incorrect");
+            }
+            Array.from(ansButtons.children).forEach(button=>{
+                if(button.dataset.correct==="true"){
+                    button.classList.add("correct");
+                }
+                button.disabled=true;
+            })
+            Next.style.display="block";           
+        });
     });
-};
+}; 
+function showScore(){
+    clearans();
+    questionElement.innerText=`You  scored ${score}/${questions.length}!`
+    Next.innerHTML="Restart";
+    Next.style.display="block";
+}
+
+function handleNextQs(){
+    currentQsIndex++;
+    if(currentQsIndex<questions.length){
+        showQuestion();
+    }else{
+        showScore();
+    }
+}
+Next.addEventListener("click",()=>{
+    if(currentQsIndex<questions.length){
+        handleNextQs();
+    }
+    else{
+        startQuiz();
+    }
+})
+
 startQuiz();
+function clearans(){
+    Next.style.display="none";
+    while(ansButtons.firstChild){
+        ansButtons.removeChild(ansButtons.firstChild);
+    }
+}
